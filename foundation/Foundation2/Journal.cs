@@ -19,12 +19,19 @@ public class Journal
         Entries = new List<JournalEntry>();
     }
 
-    public void AddEntry(string response, string mood, string location)
+    public void AddEntry(string response, string mood, string location, string date = null)
     {
+        if (string.IsNullOrWhiteSpace(response) || string.IsNullOrWhiteSpace(mood) || string.IsNullOrWhiteSpace(location))
+        {
+            Console.WriteLine("Error: Response, Mood, and Location must not be empty.");
+            return;
+        }
+
         Random rand = new Random();
         string prompt = Prompts[rand.Next(Prompts.Count)];
-        JournalEntry newEntry = new JournalEntry(prompt, response, mood, location);
+        JournalEntry newEntry = new JournalEntry(prompt, response, mood, location, date);
         Entries.Add(newEntry);
+        Console.WriteLine("New entry added successfully.");
     }
 
     public void DisplayEntries()
@@ -41,23 +48,26 @@ public class Journal
         }
     }
 
-    // Save the journal as a CSV file
     public void SaveToFile(string filename)
     {
-        using (StreamWriter writer = new StreamWriter(filename))
+        try
         {
-            // Write a header for the CSV file
-            writer.WriteLine("Date,Prompt,Response,Mood,Location");
-
-            foreach (var entry in Entries)
+            using (StreamWriter writer = new StreamWriter(filename))
             {
-                writer.WriteLine(entry.ToString());
+                writer.WriteLine("Date,Prompt,Response,Mood,Location");
+                foreach (var entry in Entries)
+                {
+                    writer.WriteLine(entry.ToString());
+                }
             }
+            Console.WriteLine("Journal saved to file.");
         }
-        Console.WriteLine("Journal saved to file.");
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Error saving to file: {ex.Message}");
+        }
     }
 
-    // Load the journal from a CSV file
     public void LoadFromFile(string filename)
     {
         if (!File.Exists(filename))
@@ -66,35 +76,40 @@ public class Journal
             return;
         }
 
-        Entries.Clear();
-        using (StreamReader reader = new StreamReader(filename))
+        try
         {
-            string line;
-            bool firstLine = true;
-
-            while ((line = reader.ReadLine()) != null)
+            Entries.Clear();
+            using (StreamReader reader = new StreamReader(filename))
             {
-                if (firstLine)
-                {
-                    // Skip the header line
-                    firstLine = false;
-                    continue;
-                }
+                string line;
+                bool firstLine = true;
 
-                // Parse the CSV line into components
-                string[] parts = line.Split(',');
-
-                if (parts.Length == 5)
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string date = parts[0];
-                    string prompt = parts[1].Trim('"');
-                    string response = parts[2].Trim('"');
-                    string mood = parts[3].Trim('"');
-                    string location = parts[4].Trim('"');
-                    Entries.Add(new JournalEntry(prompt, response, mood, location) { Date = date });
+                    if (firstLine)
+                    {
+                        firstLine = false;  // Skip the header line
+                        continue;
+                    }
+
+                    string[] parts = line.Split(',');
+
+                    if (parts.Length == 5)
+                    {
+                        string date = parts[0];
+                        string prompt = parts[1].Trim('"');
+                        string response = parts[2].Trim('"');
+                        string mood = parts[3].Trim('"');
+                        string location = parts[4].Trim('"');
+                        Entries.Add(new JournalEntry(prompt, response, mood, location, date));
+                    }
                 }
             }
+            Console.WriteLine("Journal loaded from file.");
         }
-        Console.WriteLine("Journal loaded from file.");
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Error loading from file: {ex.Message}");
+        }
     }
 }

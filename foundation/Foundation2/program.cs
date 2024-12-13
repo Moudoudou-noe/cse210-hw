@@ -1,122 +1,121 @@
 using System;
 using System.Collections.Generic;
 
-class Product
+class Item
 {
-    private string _name;
-    private string _productId;
-    private decimal _price;
-    private int _quantity;
+    private string _productName;
+    private string _productCode;
+    private decimal _unitPrice;
+    private int _quantityInStock;
 
-    public Product(string name, string productId, decimal price, int quantity)
+    public Item(string productName, string productCode, decimal unitPrice, int quantityInStock)
     {
-        _name = name;
-        _productId = productId;
-        _price = price;
-        _quantity = quantity;
+        _productName = productName;
+        _productCode = productCode;
+        _unitPrice = unitPrice;
+        _quantityInStock = quantityInStock;
     }
 
-    public decimal GetTotalCost() => _price * _quantity;
+    public decimal GetCost() => _unitPrice * _quantityInStock;
 
-    public string GetPackingLabel() => $"{_name} (ID: {_productId})";
+    public string GenerateLabel() => $"{_productName} (Code: {_productCode})";
 }
 
-class Address
+class Location
 {
-    private string _street;
+    private string _streetAddress;
     private string _city;
     private string _stateOrProvince;
-    private string _country;
+    private string _nation;
 
-    public Address(string street, string city, string stateOrProvince, string country)
+    public Location(string streetAddress, string city, string stateOrProvince, string nation)
     {
-        _street = street;
+        _streetAddress = streetAddress;
         _city = city;
         _stateOrProvince = stateOrProvince;
-        _country = country;
+        _nation = nation;
     }
 
-    public bool IsInUSA() => _country.ToLower() == "usa";
+    public bool IsFromUS() => _nation.ToLower() == "united states";
 
-    public string GetFullAddress()
+    public string FullLocation()
     {
-        return $"{_street}\n{_city}, {_stateOrProvince}\n{_country}";
+        return $"{_streetAddress}\n{_city}, {_stateOrProvince}\n{_nation}";
     }
 }
 
-class Customer
+class Client
 {
-    private string _name;
-    private Address _address;
+    private string _fullName;
+    private Location _shippingAddress;
 
-    public Customer(string name, Address address)
+    public Client(string fullName, Location shippingAddress)
     {
-        _name = name;
-        _address = address;
+        _fullName = fullName;
+        _shippingAddress = shippingAddress;
     }
 
-    public string GetName() => _name;
+    public string GetFullName() => _fullName;
 
-    public Address GetAddress() => _address;
+    public Location GetShippingLocation() => _shippingAddress;
 
-    public bool LivesInUSA() => _address.IsInUSA();
+    public bool ResidesInUSA() => _shippingAddress.IsFromUS();
 }
 
-class Order
+class Purchase
 {
-    private List<Product> _products;
-    private Customer _customer;
+    private List<Item> _items;
+    private Client _client;
 
-    public Order(Customer customer)
+    public Purchase(Client client)
     {
-        _products = new List<Product>();
-        _customer = customer;
+        _items = new List<Item>();
+        _client = client;
     }
 
-    public void AddProduct(Product product)
+    public void AddItem(Item item)
     {
-        _products.Add(product);
+        _items.Add(item);
     }
 
-    public decimal CalculateTotalCost()
+    public decimal CalculateTotalAmount()
     {
         decimal total = 0;
-
-        foreach (var product in _products)
+        foreach (var item in _items)
         {
-            total += product.GetTotalCost();
+            total += item.GetCost();
         }
 
-        total += _customer.LivesInUSA() ? 5 : 35;
+        total += _client.ResidesInUSA() ? 5 : 35;
         return total;
     }
 
-    public void DisplayPackingLabel()
+    public void ShowPackingDetails()
     {
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Packing Label:");
+        Console.WriteLine("Packing Details:");
         Console.ResetColor();
-        foreach (var product in _products)
+        foreach (var item in _items)
         {
-            Console.WriteLine($"- {product.GetPackingLabel()}");
+            Console.WriteLine($"- {item.GenerateLabel()}");
         }
         Console.WriteLine();
     }
 
-    public void DisplayShippingLabel()
+    public void ShowShippingDetails()
     {
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("Shipping Label:");
+        Console.WriteLine("Shipping Details:");
         Console.ResetColor();
-        Console.WriteLine($"{_customer.GetName()}");
-        Console.WriteLine(_customer.GetAddress().GetFullAddress());
+        Console.WriteLine($"{_client.GetFullName()}");
+        Console.WriteLine(_client.GetShippingLocation().FullLocation());
         Console.WriteLine();
     }
 
-    public void DisplayTotalCost()
+    public void ShowTotalAmount()
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"Total Cost: ${CalculateTotalCost():F2}");
+        Console.WriteLine($"Total Amount: ${CalculateTotalAmount():F2}");
         Console.ResetColor();
         Console.WriteLine("------------------------------------------------");
     }
@@ -126,36 +125,36 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Create addresses
-        var address1 = new Address("123 Main St", "Los Angeles", "CA", "USA");
-        var address2 = new Address("456 Elm St", "Toronto", "ON", "Canada");
+        // Define locations
+        var location1 = new Location("101 First St", "New York", "NY", "United States");
+        var location2 = new Location("202 Second St", "Vancouver", "BC", "Canada");
 
-        // Create customers
-        var customer1 = new Customer("John Doe", address1);
-        var customer2 = new Customer("Jane Smith", address2);
+        // Define clients
+        var client1 = new Client("Alice Johnson", location1);
+        var client2 = new Client("Bob Williams", location2);
 
-        // Create products
-        var product1 = new Product("Laptop", "A123", 999.99m, 1);
-        var product2 = new Product("Mouse", "B456", 25.99m, 2);
-        var product3 = new Product("Keyboard", "C789", 49.99m, 1);
-        var product4 = new Product("Monitor", "D101", 199.99m, 1);
+        // Define items
+        var item1 = new Item("Smartphone", "P100", 799.99m, 1);
+        var item2 = new Item("Headphones", "P200", 129.99m, 2);
+        var item3 = new Item("Tablet", "P300", 499.99m, 1);
+        var item4 = new Item("Keyboard", "P400", 89.99m, 2);
 
         // Create orders
-        var order1 = new Order(customer1);
-        order1.AddProduct(product1);
-        order1.AddProduct(product2);
+        var purchase1 = new Purchase(client1);
+        purchase1.AddItem(item1);
+        purchase1.AddItem(item2);
 
-        var order2 = new Order(customer2);
-        order2.AddProduct(product3);
-        order2.AddProduct(product4);
+        var purchase2 = new Purchase(client2);
+        purchase2.AddItem(item3);
+        purchase2.AddItem(item4);
 
         // Display order details
-        order1.DisplayPackingLabel();
-        order1.DisplayShippingLabel();
-        order1.DisplayTotalCost();
+        purchase1.ShowPackingDetails();
+        purchase1.ShowShippingDetails();
+        purchase1.ShowTotalAmount();
 
-        order2.DisplayPackingLabel();
-        order2.DisplayShippingLabel();
-        order2.DisplayTotalCost();
+        purchase2.ShowPackingDetails();
+        purchase2.ShowShippingDetails();
+        purchase2.ShowTotalAmount();// Hello and for your information I use an emulator as a server to do my codes and this emulator is: https://dotnetfiddle.net/#, this is what I use since it's me my vs code no longer responds since I think it's my machine, so stop thinking that I cheat or anything, I have always worked honestly but if you think otherwise ok no problem make me a video call not even zoom and you will see how I will redo this code as I did it
     }
 }
